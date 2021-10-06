@@ -8,7 +8,13 @@ $(document).ready(function() {
     let requestNazioni = inviaRichiesta("GET", "/api/Nazioni");
     requestNazioni.fail(errore);
     requestNazioni.done(function(data){
-        console.log(data);
+        for (let i=0;i<data.nazioni.length;i++) {
+            $('<a>',{
+                'class':'dropdown-item',
+                'href':'/?nation='+data.nazioni[i],
+                'text':data.nazioni[i]
+            }).appendTo(_lstNazioni);
+        }
     });
 
 })
