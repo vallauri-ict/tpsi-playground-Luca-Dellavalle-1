@@ -4,10 +4,10 @@ import * as _fs from "fs"
 import * as _mime from "mime" 
 import * as _querystring from "query-string"
 import { callbackify, inherits } from "util"
-let HEADERS = require("./headers.json")
+import {HEADERS} from "./headers"
 let paginaErrore : string ;
 
-class Dispatcher{
+export class Dispatcher{
     prompt:string = ">>> "
     //ogni listener è costituito da un json del tipo
     // {"risorsa":"callback"}
@@ -139,4 +139,3 @@ function init(){
     });
 }
 
-module.exports = new Dispatcher();
