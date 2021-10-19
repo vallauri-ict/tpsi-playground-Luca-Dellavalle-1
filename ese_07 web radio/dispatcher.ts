@@ -4,7 +4,7 @@ import * as _fs from "fs"
 import * as _mime from "mime" 
 import * as _querystring from "query-string"
 import { callbackify, inherits } from "util"
-import HEADERS from "./headers.json"
+import {HEADERS} from "./headers"
 let paginaErrore : string ;
 
 export class Dispatcher{
@@ -139,4 +139,3 @@ function init(){
     });
 }
 
-//module.exports = new Dispatcher();
