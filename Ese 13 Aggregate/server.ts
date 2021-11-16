@@ -61,3 +61,102 @@ mongoClient.connect(CONNECTION_STRING, (err, client) => {
     console.log("Errore connessione al db: " + err.message);
   }
 });
+
+
+//query 3
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("unicorns");
+    let req = collection.aggregate([
+      {"$match": {"gender":{"$exists":true}}},
+      {"$group": { "_id":"$gender", "totale":{"$sum":1}}} 
+    ]).toArray();
+    req.then(function (data){
+      console.log("Query 3", data);
+    })
+    req.catch(function(err){
+      console.log("Errore esecuzione query: " + err.message);
+    })
+    req.finally(function(){
+      client.close();
+    });
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+
+//query 4
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("unicorns");
+    let req = collection.aggregate([
+      {"$match": {"gender":{"$exists":true}}},
+      {"$group": { "_id":{"gender":"$gender"}, "mediaVampiri":{"$avg":"$vampires"}}} 
+    ]).toArray();
+    req.then(function (data){
+      console.log("Query 4", data);
+    })
+    req.catch(function(err){
+      console.log("Errore esecuzione query: " + err.message);
+    })
+    req.finally(function(){
+      client.close();
+    });
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+
+
+//query 5
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("unicorns");
+    let req = collection.aggregate([
+      {"$match": {"gender":{"$exists":true}}},
+      {"$group": { "_id":{"gender":"$gender", "hair":"$hair"}, "nEsemplari":{"$sum":1}}},
+      {"$sort":{"nEsemplari":-1, "_id":-1}}
+    ]).toArray();
+    req.then(function (data){
+      console.log("Query 5", data);
+    })
+    req.catch(function(err){
+      console.log("Errore esecuzione query: " + err.message);
+    })
+    req.finally(function(){
+      client.close();
+    });
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
+
+
+//query 6 da fare
+mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  if (!err) {
+    let db = client.db(DB_NAME);
+    let collection = db.collection("unicorns");
+    let req = collection.aggregate([
+      {"$match": {"gender":{"$exists":true}}},
+      {"$group": { "_id":{"gender":"$gender", "hair":"$hair"}, "nEsemplari":{"$sum":1}}},
+      {"$sort":{"nEsemplari":-1, "_id":-1}}
+    ]).toArray();
+    req.then(function (data){
+      console.log("Query 6", data);
+    })
+    req.catch(function(err){
+      console.log("Errore esecuzione query: " + err.message);
+    })
+    req.finally(function(){
+      client.close();
+    });
+  } else {
+    console.log("Errore connessione al db: " + err.message);
+  }
+});
