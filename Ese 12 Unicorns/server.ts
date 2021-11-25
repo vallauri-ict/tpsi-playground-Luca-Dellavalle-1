@@ -1,7 +1,10 @@
 import * as mongodb from "mongodb";
 
 const mongoClient = mongodb.MongoClient;
-const CONNECTION_STRING = "mongodb://127.0.0.1:27017";
+//accesso locale
+//const CONNECTION_STRING = "mongodb://127.0.0.1:27017";
+//accesso su atlas (nodejs)
+const CONNECTION_STRING = "mongodb+srv://admin:admin@cluster0.zarz7.mongodb.net/5B?retryWrites=true&w=majority";
 const DB_NAME = "5B"
 
 //query 1
