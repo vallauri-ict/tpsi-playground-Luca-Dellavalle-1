@@ -1,34 +1,22 @@
-$(document).ready(function () {
+"use strict"
 
-    $("#btnInvia").on("click", function () {
-        let request = inviaRichiesta("get", "/api/servizio1", { "name": "Minnie" }
-        );
-        request.fail(errore);
-        request.done(function (data) {
-            alert(JSON.stringify(data));
-        });
-    });
+$(document).ready(function() {
 
-    $("#btnInvia2").on("click", function () {
-        let request = inviaRichiesta("patch", "/api/servizio2", { "nome": "Unico", "vampires":3 }
-        );
-        request.fail(errore);
-        request.done(function (data) {
-            if(data.modifiedCount > 0){
-                alert("Aggiornamento effettuato");
-            }
-            else{
-                alert("Nessuna corrispondenza");
-            }
-        });
-    });
+    let divIntestazione = $("#divIntestazione")
+    let divCollections = $("#divCollections")
+    let table = $("#mainTable")
+    let divDettagli = $("#divDettagli")
+    let currentCollection = "";
 
-    $("#btnInvia3").on("click", function () {
-        let request = inviaRichiesta("get", "/api/servizio3/m/brown");
-        request.fail(errore);
-        request.done(function (data) {
-            console.log(data);
-        });
-    });
+    let request = inviaRichiesta("get", "/api/getCollections");
+    request.fail(errore)
+    request.done(function(collections) {
+      console.log(collections);
+    })
+
+
+   
+   
+   
+   
 });
-
