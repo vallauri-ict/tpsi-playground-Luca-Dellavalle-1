@@ -67,7 +67,7 @@ app.use("/", function(req, res, next){
 //****************************************************************
 //elenco delle routes di risposta al client
 //****************************************************************
-// 5 risposta al client
+// middleware di apertura della connessione
 app.use("/", (req, res, next) => {
     mongoClient.connect(CONNECTION_STRING, (err, client) => {
       if (err) {
@@ -80,7 +80,7 @@ app.use("/", (req, res, next) => {
     });
   });
 
-  //6
+  //lettura delle collezioni presenti nel db
   app.get("/api/getCollections", (req, res, next) => {
     let db = req["client"].db(DB_NAME) as mongodb.Db;
     let request = db.listCollections().toArray();
@@ -95,23 +95,50 @@ app.use("/", (req, res, next) => {
     });
   });
 
-  //7
-  app.get("/api/servizio3/:gender/:hair", (req, res, next) => {
-    let gender = req.params.gender;
-    let hair = req.params.hair;
+  //middleware di intercettazione dei parametri
+  let currentCollection = "";
+  let id = ""
+  //:id? diventa un campo facoltativo
+  app.use("/api/:collection/:id?",(req, res, next) =>{
+    currentCollection = req.params.collection;
+    id = req.params.id;
+    next();
+  })
+  /*app.use("/api/:collection/:id",(req, res, next) =>{
+    id = req.params.id;
+    next();
+  })*/
 
+  // listener specifici: 
+  //listener GET
+  app.get("/api/*", (req, res, next) => {
     let db = req["client"].db(DB_NAME) as mongodb.Db;
-    let collection = db.collection("unicorns");
-    let request = collection.find({"$and":[{"gender":gender},{"hair": hair}]}).toArray();
-    request.then((data) => {
-    res.send(data);
-    });
-    request.catch((err) => {
-    res.status(503).send("Sintax error in the query");
-    });
-    request.finally(() => {
-    req["client"].close();
-    });
+    let collection = db.collection(currentCollection);
+    if(!id){
+      let request = collection.find().toArray();
+      request.then((data) => {
+        res.send(data);
+        });
+        request.catch((err) => {
+        res.status(503).send("Sintax error in the query");
+        });
+        request.finally(() => {
+        req["client"].close();
+      });
+    }
+    else{
+      let oid = new mongodb.ObjectId(id);
+      let request = collection.find({"_id":oid}).toArray();
+      request.then((data) => {
+        res.send(data);
+        });
+        request.catch((err) => {
+        res.status(503).send("Sintax error in the query");
+        });
+        request.finally(() => {
+        req["client"].close();
+      });
+    }
 });
   
 
