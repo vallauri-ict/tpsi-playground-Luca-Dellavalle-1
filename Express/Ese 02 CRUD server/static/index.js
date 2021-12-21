@@ -29,7 +29,7 @@ $(document).ready(function() {
     currentCollection = $(this).val();
     let request = inviaRichiesta("GET", "/api/"+currentCollection)
     request.fail(errore);
-    request.done(function(data){
+    request.done(function aggiornaTabella(data){
       //console.log(data);
       divIntestazione.find("strong").eq(0).text(currentCollection);
       divIntestazione.find("strong").eq(1).text(data.length);
@@ -72,11 +72,45 @@ $(document).ready(function() {
     request.done(function(data){
       console.log(data);
       let content = "";
-      for (const key in data[0]) {
-        content += "<strong>"+ key +"</strong> : " + data[0][key] + "<br>";
+      for (const key in data) {
+        content += "<strong>"+ key +"</strong> : " + data[key] + "<br>";
         divDettagli.html(content);
       }
     })
   }
+
+  $("#btnAdd").on("click", function(){
+    divDettagli.empty();
+    let txtArea = $("<textarea>");
+    txtArea.val("{ }");
+    txtArea.appendTo(divDettagli);
+
+    let btnInvia = $("<button>");
+    btnInvia.text("INVIA");
+    btnInvia.appendTo(divDettagli);
+    btnInvia.on("click", function(){
+      let param = "";
+      try{
+        param = JSON.parse(txtArea.val());
+      }
+      catch{
+        alert("Errore: Json non valido");
+        return;
+      }
+
+      let request = inviaRichiesta("post", "/api/"+currentCollection, param);
+      request.fail(errore);
+      request.done(function(){
+        alert("Inserimento eseguito correttamente");
+        divDettagli.empty();
+        
+        divCollections.trigger("click","input[type=radio]");
+
+        /*let request = inviaRichiesta("GET", "/api/"+currentCollection)
+        request.fail(errore);
+        request.done(aggiornaTabella);*/
+      });
+    });
+  });
 });
 

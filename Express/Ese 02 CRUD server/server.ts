@@ -104,10 +104,6 @@ app.use("/", (req, res, next) => {
     id = req.params.id;
     next();
   })
-  /*app.use("/api/:collection/:id",(req, res, next) =>{
-    id = req.params.id;
-    next();
-  })*/
 
   // listener specifici: 
   //listener GET
@@ -115,7 +111,7 @@ app.use("/", (req, res, next) => {
     let db = req["client"].db(DB_NAME) as mongodb.Db;
     let collection = db.collection(currentCollection);
     if(!id){
-      let request = collection.find().toArray();
+      let request = collection.find().project({"_id":1, "name":1}).toArray();
       request.then((data) => {
         res.send(data);
         });
@@ -128,7 +124,7 @@ app.use("/", (req, res, next) => {
     }
     else{
       let oid = new mongodb.ObjectId(id);
-      let request = collection.find({"_id":oid}).toArray();
+      let request = collection.findOne({"_id":oid});
       request.then((data) => {
         res.send(data);
         });
@@ -139,6 +135,21 @@ app.use("/", (req, res, next) => {
         req["client"].close();
       });
     }
+
+    app.post("/api/*", (req, res, next) => {
+      let db = req["client"].db(DB_NAME) as mongodb.Db;
+      let collection = db.collection(currentCollection);
+      let request = collection.insertOne(req["body"]);
+      request.then((data) => {
+        res.send(data);
+        });
+        request.catch((err) => {
+        res.status(503).send("Sintax error in the query");
+        });
+        request.finally(() => {
+        req["client"].close();
+      });
+    })
 });
   
 
@@ -146,7 +157,7 @@ app.use("/", (req, res, next) => {
 //default route(risorse non trovate) e route di gestione degli errori
 //****************************************************************
 app.use("/", function(err, req, res, next){
-    console.log("Errore codice server", err.message );
+    console.log("***************  ERRORE CODICE SERVER ", err.message, "  *****************");
 })
 
 
