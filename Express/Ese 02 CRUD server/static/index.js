@@ -29,8 +29,7 @@ $(document).ready(function() {
     currentCollection = $(this).val();
     let request = inviaRichiesta("GET", "/api/"+currentCollection)
     request.fail(errore);
-    request.done(function aggiornaTabella(data){
-      //console.log(data);
+    request.done(function(data){
       divIntestazione.find("strong").eq(0).text(currentCollection);
       divIntestazione.find("strong").eq(1).text(data.length);
       if(currentCollection == "unicorns"){
@@ -48,34 +47,93 @@ $(document).ready(function() {
         let td = $("<td>");
         td.appendTo(tr);
         td.text(item._id);
-        td.prop("id",item._id);
+        td.prop("_id",item._id);
+        td.prop("method","get");
         td.on("click", visualizzaDettagli)
         
         td = $("<td>");
         td.appendTo(tr);
         td.text(item.name);
-        td.prop("id",item._id);
+        td.prop("_id",item._id);
+        td.prop("method","get");
         td.on("click", visualizzaDettagli)
 
         td = $("<td>");
         td.appendTo(tr);
-        for (let i = 0; i < 3; i++) {
-          $("<div>").appendTo(td); 
-        }
+
+        $("<div>").appendTo(td).prop({"_id":item._id , "method":"patch"}).on("click",visualizzaDettagli); 
+        
+        $("<div>").appendTo(td).prop({"_id":item._id , "method":"put"}).on("click",visualizzaDettagli); 
+        
+        $("<div>").appendTo(td).prop("_id",item._id).on("click",elimina);
+
+
       }
     });
   });
 
+  function elimina(){
+    let request = inviaRichiesta("delete","/api/"+currentCollection +"/"+$(this).prop("_id"));
+    request.fail(errore);
+    request.done(function(){
+      alert("documento rimosso correttamente");
+      aggiorna();
+    })
+
+  }
+
   function visualizzaDettagli(){
-    let request = inviaRichiesta("GET","/api/"+currentCollection +"/"+ $(this).prop("id"))
+    let method = $(this).prop("method").toUpperCase();
+    let id = $(this).prop("_id");
+    let request = inviaRichiesta("GET","/api/"+currentCollection +"/"+id)
     request.fail(errore);
     request.done(function(data){
       console.log(data);
-      let content = "";
-      for (const key in data) {
-        content += "<strong>"+ key +"</strong> : " + data[key] + "<br>";
-        divDettagli.html(content);
+      if(method == "GET"){
+        let content = "";
+        for (const key in data) {
+          content += "<strong>"+ key +"</strong> : " + data[key] + "<br>";
+          divDettagli.html(content);
+        }
       }
+      else{
+        divDettagli.empty();
+        let txtArea = $("<textarea>");
+        //rimuoviamo id perché non deve essere cambiato 
+        delete(data._id);
+        txtArea.val(JSON.stringify(data, null, 2));
+        txtArea.appendTo(divDettagli);
+        //ridimensionamento della textarea in base al contenuto
+        //ScrollHeight è una property js che restituisce l'altezza della textarea
+        //  sulla base del contenuto
+        txtArea.css("height",txtArea.get(0).scrollHeight);
+        console.log(txtArea.get(0).scrollHeight);
+        visualizzaBtnInvia(method, id);
+      }
+    })
+  }
+
+  function visualizzaBtnInvia(method, id=""){
+    let btnInvia = $("<button>");
+    btnInvia.text("INVIA");
+    btnInvia.appendTo(divDettagli);
+    btnInvia.on("click", function(){
+      let param = "";
+      try{
+        param = JSON.parse(divDettagli.children("textarea").val());
+      }
+      catch{
+        alert("Errore: Json non valido");
+        return;
+      }
+
+      let request = inviaRichiesta(method, "/api/"+currentCollection+"/"+id, param);
+      request.fail(errore);
+      request.done(function(){
+        alert("operazione eseguita correttamente");
+        divDettagli.empty();    
+        aggiorna();
+      });
     })
   }
 
@@ -84,33 +142,17 @@ $(document).ready(function() {
     let txtArea = $("<textarea>");
     txtArea.val("{ }");
     txtArea.appendTo(divDettagli);
-
-    let btnInvia = $("<button>");
-    btnInvia.text("INVIA");
-    btnInvia.appendTo(divDettagli);
-    btnInvia.on("click", function(){
-      let param = "";
-      try{
-        param = JSON.parse(txtArea.val());
-      }
-      catch{
-        alert("Errore: Json non valido");
-        return;
-      }
-
-      let request = inviaRichiesta("post", "/api/"+currentCollection, param);
-      request.fail(errore);
-      request.done(function(){
-        alert("Inserimento eseguito correttamente");
-        divDettagli.empty();
-        
-        divCollections.trigger("click","input[type=radio]");
-
-        /*let request = inviaRichiesta("GET", "/api/"+currentCollection)
-        request.fail(errore);
-        request.done(aggiornaTabella);*/
-      });
-    });
+    visualizzaBtnInvia("POST");
   });
+
+
+  function aggiorna(){
+    //divCollections.trigger("click","input[type=radio]");
+    var event = jQuery.Event('click');
+    event.target = divCollections.find('input[type=radio]:checked')[0];
+    divCollections.trigger(event);
+    divDettagli.empty();
+  }
+
 });
 
