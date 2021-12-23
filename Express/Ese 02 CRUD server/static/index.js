@@ -29,7 +29,10 @@ $(document).ready(function() {
     currentCollection = $(this).val();
     let request = inviaRichiesta("GET", "/api/"+currentCollection)
     request.fail(errore);
-    request.done(function(data){
+    request.done(disegnaTabella)
+  });
+  
+  function disegnaTabella(data){
       divIntestazione.find("strong").eq(0).text(currentCollection);
       divIntestazione.find("strong").eq(1).text(data.length);
       if(currentCollection == "unicorns"){
@@ -66,11 +69,8 @@ $(document).ready(function() {
         $("<div>").appendTo(td).prop({"_id":item._id , "method":"put"}).on("click",visualizzaDettagli); 
         
         $("<div>").appendTo(td).prop("_id",item._id).on("click",elimina);
-
-
       }
-    });
-  });
+    };
 
   function elimina(){
     let request = inviaRichiesta("delete","/api/"+currentCollection +"/"+$(this).prop("_id"));
@@ -145,7 +145,6 @@ $(document).ready(function() {
     visualizzaBtnInvia("POST");
   });
 
-
   function aggiorna(){
     //divCollections.trigger("click","input[type=radio]");
     var event = jQuery.Event('click');
@@ -154,5 +153,25 @@ $(document).ready(function() {
     divDettagli.empty();
   }
 
+  $("#btnFind").on("click", function(){
+		let filterJson = {}
+		let hair = $("#lstHair").children("option:selected").val()
+		if (hair)
+      filterJson["hair"]=hair.toLowerCase();
+		
+		let male = filter.find("input[type=checkbox]").first()
+				.is(":checked")
+		let female = filter.find("input[type=checkbox]").last()
+				.is(":checked")
+		if(male && !female)
+      filterJson["gender"]='m';
+		else if(female && !male)
+      filterJson["gender"]='f';
+		
+		let request = inviaRichiesta("get", "/api/" + currentCollection, filterJson)
+		request.fail(errore)
+		request.done(disegnaTabella)
+
+	})
 });
 

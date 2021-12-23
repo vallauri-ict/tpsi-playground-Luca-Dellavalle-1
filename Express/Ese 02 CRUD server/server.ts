@@ -9,7 +9,7 @@ import * as mongodb from "mongodb";
 const mongoClient = mongodb.MongoClient;
 const CONNECTION_STRING =
   "mongodb://admin:admin@cluster0-shard-00-00.zarz7.mongodb.net:27017,cluster0-shard-00-01.zarz7.mongodb.net:27017,cluster0-shard-00-02.zarz7.mongodb.net:27017/test?replicaSet=atlas-bgntwo-shard-0&ssl=true&authSource=admin";
-const DB_NAME = "unicorns";
+const DB_NAME = "recipeBook";
 
 
 let port : number = 1337;
@@ -111,7 +111,7 @@ app.use("/", (req, res, next) => {
     let db = req["client"].db(DB_NAME) as mongodb.Db;
     let collection = db.collection(currentCollection);
     if(!id){
-      let request = collection.find().toArray();
+      let request = collection.find(req["query"]).toArray();
       request.then((data) => {
         res.send(data);
         });
