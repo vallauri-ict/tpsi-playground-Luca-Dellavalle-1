@@ -5,6 +5,7 @@ import * as body_parser from "body-parser";
 import { inherits } from "util";
 import HEADERS from "./headers.json";
 import * as mongodb from "mongodb";
+import cors from "cors";
 
 const mongoClient = mongodb.MongoClient;
 const CONNECTION_STRING =
@@ -19,8 +20,26 @@ let server = http.createServer(app);
 
 server.listen(port,function(){
     console.log("Server in ascolto sulla porta " + port)
+    
     init();
 });
+const whitelist = ["http://localhost:4200", "https://localhost:1337"];
+const corsOptions = {
+ origin: function(origin, callback) {
+ if (!origin)
+ return callback(null, true);
+ if (whitelist.indexOf(origin) === -1) {
+ var msg = 'The CORS policy for this site does not ' +
+ 'allow access from the specified Origin.';
+ return callback(new Error(msg), false);
+ }
+ else
+ return callback(null, true);
+ },
+ credentials: true
+};
+app.use("/", cors(corsOptions));
+
 
 let paginaErrore="";
 function init(){
