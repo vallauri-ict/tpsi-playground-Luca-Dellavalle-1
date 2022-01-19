@@ -8,12 +8,15 @@ import * as mongodb from "mongodb";
 import cors from "cors";
 
 const mongoClient = mongodb.MongoClient;
+const CONNECTION_STRING = process.env.MONGODB_URI  // heroku app
+/*
 const CONNECTION_STRING =
   "mongodb://admin:admin@cluster0-shard-00-00.zarz7.mongodb.net:27017,cluster0-shard-00-01.zarz7.mongodb.net:27017,cluster0-shard-00-02.zarz7.mongodb.net:27017/test?replicaSet=atlas-bgntwo-shard-0&ssl=true&authSource=admin";
+*/
 const DB_NAME = "recipeBook";
 
 
-let port : number = 1337;
+let port : number = parseInt(process.env.PORT) || 1337;
 let app = express();
 
 let server = http.createServer(app);
@@ -23,18 +26,18 @@ server.listen(port,function(){
     
     init();
 });
-const whitelist = ["http://localhost:4200", "https://localhost:1337"];
+const whitelist = ["http://localhost:4200", "http://localhost:1337", "https://luca-dellavalle-crud-server.herokuapp.com"];
 const corsOptions = {
  origin: function(origin, callback) {
  if (!origin)
- return callback(null, true);
+  return callback(null, true);
  if (whitelist.indexOf(origin) === -1) {
- var msg = 'The CORS policy for this site does not ' +
- 'allow access from the specified Origin.';
- return callback(new Error(msg), false);
+  var msg = 'The CORS policy for this site does not ' +
+  'allow access from the specified Origin.';
+  return callback(new Error(msg), false);
  }
  else
- return callback(null, true);
+  return callback(null, true);
  },
  credentials: true
 };
