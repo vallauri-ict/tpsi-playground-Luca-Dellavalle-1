@@ -5,7 +5,7 @@ $(document).ready(function() {
  aggiornaTabella()
 	
  function aggiornaTabella(){
-	let request = inviaRichiesta("GET", "/api/elenco")
+	let request = inviaRichiesta("GET", "/api/images")
 	request.fail(errore)
 	request.done(function(data){
 		let tbody = $("#mainTable").children("tbody")
