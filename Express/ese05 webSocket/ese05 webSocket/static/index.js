@@ -1,3 +1,4 @@
+"use strict"
 $(document).ready(function() {
     let user = {"username":"","room":""};
     let serverSocket;
@@ -33,7 +34,7 @@ $(document).ready(function() {
         // ricezione di un messaggio dal server		
         serverSocket.on('message_notify', function(data) {	
             data = JSON.parse(data);
-            visualizza(data.from, data.message, data.date);
+            visualizza(data);
         }); 
 
         serverSocket.on('disconnect', function() {
@@ -72,20 +73,27 @@ $(document).ready(function() {
         }
     }
 
-    function visualizza(username, message, date) {
+    function visualizza(data) {
         let wrapper = $("#wrapper")
         let container = $("<div class='message-container'></div>");
         container.appendTo(wrapper);
 
+        //img
+        let img = $("<img>");
+        img.appendTo(container);
+        img.prop({"src":"img/"+data.img, "width":50, "style":"inline"});
+
         // username e date
-        date = new Date(date);
-        let mittente = $("<small class='message-from'>" + username + " @" 
+        let date = new Date(data.date);
+        let mittente = $("<small class='message-from'>" + data.from + " @" 
 		                  + date.toLocaleTimeString() + "</small>");
         mittente.appendTo(container);
 
         // messaggio
-        message = $("<p class='message-data'>" + message + "</p>");
+        let message = $("<p class='message-data'>" + data.message + "</p>");
         message.appendTo(container);
+
+        
 
         // auto-scroll dei messaggi
         /* la proprietà html scrollHeight rappresenta l'altezza di wrapper oppure

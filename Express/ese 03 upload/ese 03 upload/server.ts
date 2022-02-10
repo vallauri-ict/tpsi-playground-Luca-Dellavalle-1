@@ -16,24 +16,13 @@ cloudinary.v2.config({
 });
 
 const mongoClient = mongodb.MongoClient;
-
-/*
-const CONNECTION_STRING =
-  "mongodb://admin:admin@cluster0-shard-00-00.zarz7.mongodb.net:27017,cluster0-shard-00-01.zarz7.mongodb.net:27017,cluster0-shard-00-02.zarz7.mongodb.net:27017/test?replicaSet=atlas-bgntwo-shard-0&ssl=true&authSource=admin";
-*/
 const DB_NAME = "5B";
-
 
 let port: number = parseInt(process.env.PORT) || 1337;
 let app = express();
 
 let server = http.createServer(app);
 
-server.listen(port, function () {
-  console.log("Server in ascolto sulla porta " + port)
-
-  init();
-});
 const whitelist = [
   "https://luca-dellavalle-crud-server.herokuapp.com",
   "http://luca-dellavalle-crud-server.herokuapp.com",
@@ -42,7 +31,13 @@ const whitelist = [
 ];
 
 
-
+//****************************************************************
+//elenco delle routes di tipo middleware
+//****************************************************************
+server.listen(port, function () {
+  console.log("Server in ascolto sulla porta " + port)
+  init();
+});
 
 let paginaErrore = "";
 function init() {
@@ -56,10 +51,6 @@ function init() {
   });
 }
 
-
-//****************************************************************
-//elenco delle routes di tipo middleware
-//****************************************************************
 // 1.log 
 app.use("/", function (req, res, next) {
   console.log("---->" + req.method + ":" + req.originalUrl);
