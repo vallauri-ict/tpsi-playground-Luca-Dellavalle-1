@@ -1,14 +1,17 @@
 "use strict";
-const http = require('http');
-const colors = require('colors');
-const express = require('express');
-const app = express()
-const server = http.createServer(app);
-const io = require('socket.io')(server);
+import http from 'http';
+import colors from 'colors';
+import express from "express";
+const app = express();
+const httpServer = http.createServer(app);
+import {Server, Socket} from 'socket.io'; // import solo l‟oggetto Server
+import { json } from 'body-parser';
+const io = new Server(httpServer);
+
 
 const PORT = 1337
 
-server.listen(PORT, function() {
+httpServer.listen(PORT, function() {
     console.log('Server listening on port ' + PORT);
 });
 
@@ -25,24 +28,28 @@ let users = [];
   'user' contenente tutte le informazioni relative al singolo utente  */
 
 io.on('connection', function(clientSocket) {
-	let user = {};
+	let user = {} as {username:string, socket:Socket, room:string};
 
 	// 1) ricezione username
-	clientSocket.on('login', function(username) {
+	clientSocket.on('login', function(userInfo) {
+		userInfo = JSON.parse(userInfo);
 		// controllo se user esiste già
 		let item = users.find(function(item) {
-			return (item.username == username)
+			return (item.username == userInfo.username)
 		})
 		if (item != null) {
 			clientSocket.emit("loginAck", "NOK")
 		}
 		else{
-			user.username = username;
+			user.username = userInfo.username;
+			user.room = userInfo.room;
 			user.socket = clientSocket;
 			users.push(user);
 			clientSocket.emit("loginAck", "OK")
 			log('User ' + colors.yellow(user.username) +
 						" (sockID=" + user.socket.id + ') connected!');
+			//inserisco username nella stanza richiesta 
+			this.join(user.room);
 		}
 	});
 
@@ -56,7 +63,10 @@ io.on('connection', function(clientSocket) {
 			'message': msg,
 			'date': new Date()
 		}
-		io.sockets.emit('message_notify', JSON.stringify(response));
+		//con questa sintassi spedisco a tutti compreso il mittente
+		////io.sockets.emit('message_notify', JSON.stringify(response));
+		//con questa sintassi spedisco solo alla stanza richiesta
+		io.to(user.room).emit('message_notify', JSON.stringify(response));
 	});
 
     // 3) disconnessione dell'utente

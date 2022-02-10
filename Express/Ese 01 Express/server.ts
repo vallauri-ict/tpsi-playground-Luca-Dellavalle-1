@@ -123,6 +123,11 @@ app.use("/", (req, res, next) => {
 //****************************************************************
 //default route(risorse non trovate) e route di gestione degli errori
 //****************************************************************
+app.use("/", function (req, res, next) {
+  res.status(404);
+  res.send("Risorsa non trovata");
+});
+
 app.use("/", function(err, req, res, next){
     console.log("Errore codice server", err.message );
 })

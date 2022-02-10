@@ -9,14 +9,14 @@ import ENVIRONMENT from "./environment.json";
 import cloudinary, { UploadApiResponse } from "cloudinary";
 
 cloudinary.v2.config({
-  cloud_name: ENVIRONMENT.CLOUD_NAME,
-  api_key: ENVIRONMENT.API_KEY,
-  api_secret: ENVIRONMENT.API_SECRET,
+  cloud_name: ENVIRONMENT.CLOUDINARY.CLOUD_NAME,
+  api_key: ENVIRONMENT.CLOUDINARY.API_KEY,
+  api_secret: ENVIRONMENT.CLOUDINARY.API_SECRET,
   // secure:true // https
 });
 
 const mongoClient = mongodb.MongoClient;
-const CONNECTION_STRING = process.env.MONGODB_URI || "mongodb://admin:admin@cluster0-shard-00-00.zarz7.mongodb.net:27017,cluster0-shard-00-01.zarz7.mongodb.net:27017,cluster0-shard-00-02.zarz7.mongodb.net:27017/test?replicaSet=atlas-bgntwo-shard-0&ssl=true&authSource=admin"  // heroku app
+
 /*
 const CONNECTION_STRING =
   "mongodb://admin:admin@cluster0-shard-00-00.zarz7.mongodb.net:27017,cluster0-shard-00-01.zarz7.mongodb.net:27017,cluster0-shard-00-02.zarz7.mongodb.net:27017/test?replicaSet=atlas-bgntwo-shard-0&ssl=true&authSource=admin";
@@ -70,9 +70,9 @@ app.use("/", function (req, res, next) {
 //il next lo fa automaticamente quando non trova la risorsa
 app.use("/", express.static("./static"));
 
-// 3.route lettura parametri post
-app.use("/", body_parser.json());
-app.use("/", body_parser.urlencoded({ "extended": true }));
+// 3.route lettura parametri post con impostazione del limite immagini base64
+app.use("/", body_parser.json({"limit":"10mb"}));
+app.use("/", body_parser.urlencoded({ "extended": true, "limit":"10mb" }));
 
 // 4.log parametri
 app.use("/", function (req, res, next) {
@@ -107,8 +107,6 @@ app.use(fileUpload({
   "limits ": { "fileSize ": (10 * 1024 * 1024) } // 10 MB
 }));
 
-// 7. base64 fileUpload(limitazione della dimensione dei parametri post)
-app.use("/", express.json({ "limit": "10mb" }))
 
 
 //****************************************************************
@@ -116,7 +114,7 @@ app.use("/", express.json({ "limit": "10mb" }))
 //****************************************************************
 // middleware di apertura della connessione
 app.use("/", (req, res, next) => {
-  mongoClient.connect(CONNECTION_STRING, (err, client) => {
+  mongoClient.connect(process.env.MONGODB_URI || ENVIRONMENT.CONNECTION_STRING, (err, client) => {
     if (err) {
       res.status(503).send("Db connection error");
     } else {
@@ -241,7 +239,7 @@ app.post("/api/cloudinaryBinario", function (req, res, next) {
           let collection = db.collection("images");
           let user = {
             "username": req.body.username,
-            "img": file.name
+            "img": result.secure_url
           }
           let request = collection.insertOne(user);
           request.then((data) => {
@@ -262,6 +260,11 @@ app.post("/api/cloudinaryBinario", function (req, res, next) {
 //****************************************************************
 //default route(risorse non trovate) e route di gestione degli errori
 //****************************************************************
+app.use("/", function (req, res, next) {
+  res.status(404);
+  res.send("Risorsa non trovata");
+});
+
 app.use("/", function (err, req, res, next) {
   console.log("***************  ERRORE CODICE SERVER ", err.message, "  *****************");
 })

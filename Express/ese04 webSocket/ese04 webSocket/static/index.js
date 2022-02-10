@@ -1,27 +1,34 @@
 $(document).ready(function() {
-    let username = prompt("Inserisci lo username:");
-    
+    let user = {"username":"","room":""};
+
 	// mi connetto al server che mi ha inviato la pagina,
 	// il quale mi restituisce il suo serverSocket
 	// io.connect é SINCRONO, bloccante
-	let serverSocket = io.connect()
+	let serverSocket = io({transports:['websocket'], upgrade: false}).connect();
 
     /* 1a) lo username viene inviato SOLO a connessione avvenuta
 	       in questo modo si evita di connetere/disconnettere + volte */
 	serverSocket.on('connect', function() {
 		console.log("connessione ok");
-        serverSocket.emit("login", username);
+        user.username = prompt("Inserisci lo username:");
+        if(user.username == "pippo" || user.username == "pluto"){
+            user.room = "room1";
+        }
+        else{
+            user.room = "defaultRoom";
+        }
+        serverSocket.emit("login", JSON.stringify(user));
     });
 
     // 1b) utente valido / non valido
     serverSocket.on('loginAck', function(data) {
 		if (data=="NOK"){
 			alert("Nome già esistente. Scegliere un altro nome")
-			username = prompt("Inserisci un nuovo username:");
-			serverSocket.emit("login", username);
+			user.username = prompt("Inserisci un nuovo username:");
+			serverSocket.emit("login", user.username);
 		}
 		else
-			document.title = username;
+			document.title = user.username;
     });  
 
 	// 2a) invio messaggio
@@ -71,3 +78,4 @@ $(document).ready(function() {
         wrapper.animate({ "scrollTop": h }, 500);
     }
 });
+
